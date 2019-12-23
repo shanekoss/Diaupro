@@ -31,13 +31,13 @@ Monitor::~Monitor() {
 void Monitor::initializeControlSocket()
 {
 
-    listenSocket = new DatagramSocket(false);
+    listenSocket = std::make_unique<DatagramSocket>(false);
     if(!listenSocket->bindToPort(0))
     {
         Logger::writeToLog("listenSocket could not bind to a port");
     }
 
-    controlSocket = new DatagramSocket(false);
+    controlSocket = std::make_unique<DatagramSocket>(false);
     if(!controlSocket->bindToPort(0))
     {
         Logger::writeToLog("controlSocket could not bind to a port");

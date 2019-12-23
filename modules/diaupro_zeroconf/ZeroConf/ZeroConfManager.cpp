@@ -52,9 +52,14 @@ static void zeroBrowseCallback(DNSServiceRef sdRef,
     Logger::writeToLog(String::formatted("RegType: %s",  regtype));
     Logger::writeToLog(String::formatted("Reply Domain: %s",  replyDomain));
 
-    if(addString.equalsIgnoreCase("ADD")) Logger::writeToLog("Adding service");
-    zManager->addService(service);
-
+    if(addString.equalsIgnoreCase("ADD")){
+        Logger::writeToLog("Adding service");
+        zManager->addService(service);
+    }
+    if(addString.equalsIgnoreCase("REMOVE")){
+        Logger::writeToLog("Removing service");
+        zManager->removeService(service);
+    }
 }
 
 static void zeroResolveCallback(DNSServiceRef sdRef,
@@ -99,7 +104,8 @@ static void zeroRegisterCallback(DNSServiceRef sdRef,
     service->sdRef = &sdRef;
     service->status = ZeroConfService::ResultStatus::registerResult;
 
-    zManager->addService(service);
+    // NO NEED TO ADD TO OUR SERVICE LIST FOR NOW
+    //zManager->addService(service);
 }
 
 static void zeroQueryRecordReply(DNSServiceRef       sdRef,
@@ -180,6 +186,15 @@ void ZeroConfManager::registerService(ZeroConfService *service)
 
 void ZeroConfManager::removeService(ZeroConfService *service)
 {
+    
+    for (int i = 0; i < serviceList.size(); i++) {
+        if (*service == *serviceList.getUnchecked(i) ) {
+            serviceList[i]->setAddString("REMOVE");
+            Logger::writeToLog("RemoveService");
+            notifyListener();
+            break;
+        }
+    }
     monitor->removeFileDescriptorAndListener(this->getRegisterServiceFileDescriptor());
 }
 
@@ -357,14 +372,14 @@ OwnedArray<ZeroConfService, CriticalSection> *ZeroConfManager::getServiceList() 
 }
 
 void ZeroConfManager::addService(ZeroConfService *service) {
-
     for (int i = 0; i < serviceList.size(); i++) {
         if (*service == *serviceList.getUnchecked(i) ) {
             serviceList.remove(i);
-            Logger::writeToLog("Removed Service");
+            Logger::writeToLog("Removed Superfluous Service");
             break;
         }
     }
     serviceList.add(service);
     Logger::writeToLog("Added Service");
 }
+

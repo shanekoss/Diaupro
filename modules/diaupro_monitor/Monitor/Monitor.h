@@ -49,7 +49,7 @@ private:
     juce::Array<int> fileDescriptors;
     juce::CriticalSection lock;
 
-    ScopedPointer<DatagramSocket> listenSocket, controlSocket;
+    std::unique_ptr<DatagramSocket> listenSocket, controlSocket;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Monitor)
 };
